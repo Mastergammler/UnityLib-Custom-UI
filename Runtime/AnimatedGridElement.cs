@@ -13,7 +13,6 @@ public class AnimatedGridElement : MonoBehaviour,IPointerEnterHandler,IPointerEx
 
     public void OnPointerClick(PointerEventData eventData)
     {
-
         Vector3 tweenTo = mIsSmall ? new Vector3(1f,1f,0f) : new Vector3(.5f,.5f,0f);
         mIsSmall = ! mIsSmall;
         mIsLocked = true;

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UI;
 
 namespace MgSq.UI.Editor
 {
+    [ExecuteInEditMode()]
     public class EditorExtensions
     {
         [MenuItem("GameObject/UI/Custom/Linear Progress Bar")]
