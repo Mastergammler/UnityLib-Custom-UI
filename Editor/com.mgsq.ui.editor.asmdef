@@ -1,0 +1,17 @@
+{
+    "name": "com.mgsq.ui.editor",
+    "references": [
+        "GUID:ac4f5fd2d390798419bf8d91fb0d706e"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
