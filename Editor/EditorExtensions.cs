@@ -7,11 +7,12 @@ using UnityEngine.UI;
 namespace MgSq.UI.Editor
 {
     [ExecuteInEditMode()]
-    public class EditorExtensions
+    public class EditorExtensions : MonoBehaviour
     {
         [MenuItem("GameObject/UI/Custom/Linear Progress Bar")]
         public static void AddLinearProgressBar()
         {
+            
             GameObject obj = Instantiate(Resources.Load<GameObject>("LinearProgressBar"));
             obj.transform.SetParent(Selection.activeGameObject.transform,false);
         }
