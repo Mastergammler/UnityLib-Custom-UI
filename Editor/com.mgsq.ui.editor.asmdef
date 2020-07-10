@@ -4,9 +4,7 @@
         "GUID:ac4f5fd2d390798419bf8d91fb0d706e"
     ],
     "includePlatforms": [
-        "Editor",
-        "WindowsStandalone32",
-        "WindowsStandalone64"
+        "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
