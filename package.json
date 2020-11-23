@@ -1,6 +1,6 @@
 {
   "name": "com.mgsq.ui",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "displayName": "Custom UI",
   "description": "Few custom ui implementations for Unity",
   "unity": "2020.1",
