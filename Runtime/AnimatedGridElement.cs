@@ -11,7 +11,7 @@ public class AnimatedGridElement : MonoBehaviour,IPointerEnterHandler,IPointerEx
     public LeanTweenType type = LeanTweenType.easeInCubic;
     public AnimationCurve CustomCurve;
 
-    public virtual OnPointerClick(PointerEventData eventData)
+    public virtual void OnPointerClick(PointerEventData eventData)
     {
         Vector3 tweenTo = mIsSmall ? new Vector3(1f,1f,0f) : new Vector3(.5f,.5f,0f);
         mIsSmall = ! mIsSmall;
@@ -21,13 +21,13 @@ public class AnimatedGridElement : MonoBehaviour,IPointerEnterHandler,IPointerEx
         LTDescr finalDesc = type == LeanTweenType.animationCurve ? desc.setEase(CustomCurve) : desc.setEase(type);
     }
 
-    public virtual OnPointerEnter(PointerEventData eventData)
+    public virtual void OnPointerEnter(PointerEventData eventData)
     {
         if(mIsSmall || mIsLocked) return;
         LeanTween.scale(gameObject,new Vector3(1.1f,1.1f,0),.1f);
     }
 
-    public virtual OnPointerExit(PointerEventData eventData)
+    public virtual void OnPointerExit(PointerEventData eventData)
     {
         if(mIsSmall || mIsLocked) return;
         LeanTween.scale(gameObject,new Vector3(1.0f,1.0f,0),.1f);
