@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.InputSystem.UI;
+using UnityEngine.EventSystems;
 
 namespace MgSq.UI
 {
@@ -39,7 +41,7 @@ namespace MgSq.UI
                 mLayoutElement.enabled = (headerLength > mCharacterWrapLimit || contentLength > mCharacterWrapLimit) ? true : false;
             }
 
-            Vector2 pos = Input.mousePosition;
+            Vector2 pos = ((InputSystemUIInputModule)EventSystem.current.currentInputModule).point.action.ReadValue<Vector2>();
             float posX = pos.x / Screen.width;
             float posY = pos.y / Screen.height;
             transform.position = pos;

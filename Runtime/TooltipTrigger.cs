@@ -10,12 +10,12 @@ namespace MgSq.UI
         public string TooltipHeader;
         public string TooltipContent;
         private  LTDescr mDelay;
-        public void OnPointerEnter(PointerEventData eventData)
+        public virtual void OnPointerEnter(PointerEventData eventData)
         {
             mDelay = LeanTween.delayedCall(.5f,() => TooltipSystem.Instance.Show(TooltipContent,TooltipHeader));
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        public virtual void OnPointerExit(PointerEventData eventData)
         {
             LeanTween.cancel(mDelay.uniqueId);
             TooltipSystem.Instance.Hide();
