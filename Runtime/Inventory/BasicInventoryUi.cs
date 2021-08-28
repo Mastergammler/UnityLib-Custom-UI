@@ -28,6 +28,7 @@ namespace MgSq.UI.Inventory
 		private int mUiSlotNumber;
 		private IDictionary<int, ItemView> mSlotItemMapping = new Dictionary<int, ItemView>();
 		private Func<Transform, int, Image> getItemImageElement = (t, i) => t.GetChild(i).Find(IMAGE_SLOT_OBJECT_NAME).GetComponentInChildren<Image>();
+		private int curIndex;
 
 		//################
 		//##    MONO    ##
@@ -45,9 +46,23 @@ namespace MgSq.UI.Inventory
 		{
 			for (int i = 0; i < mUiSlotNumber; i++)
 			{
+
 				mAvailableUiSlots[i] = getItemImageElement(transform, i);
 				mAvailableUiSlots[i].color = COLOR_TRANSPARENT;
+				curIndex = i;
+				transform.GetChild(i).GetComponent<Button>().onClick.AddListener(Register);
 			}
+		}
+
+		private void Register()
+		{
+			Debug.Log("OnClick triggered");
+			if (mSlotItemMapping.TryGetValue(curIndex, out ItemView view))
+			{
+				Debug.Log("InsideIf");
+				OnItemSelected?.Invoke(view.ItemId);
+			}
+
 		}
 
 		//######################
@@ -60,7 +75,7 @@ namespace MgSq.UI.Inventory
 			int foundSlot = findNextAvailableIndex();
 			if (foundSlot != -1)
 			{
-				mSlotItemMapping.Add(findNextAvailableIndex(), item);
+				mSlotItemMapping.Add(foundSlot, item);
 				mAvailableUiSlots[foundSlot].color = COLOR_WHITE;
 				mAvailableUiSlots[foundSlot].sprite = item.Image;
 			}

@@ -3,12 +3,11 @@
   "version": "0.2.3",
   "displayName": "Custom UI",
   "description": "UI Implementations for\n - Flexible Grid Layout\n - Tooltips\n - Progress Bars\n Includes the Lean Tween library",
-  "unity": "2021.15",
+  "unity": "2021.1",
   "keywords": [
     "library",
     "utility",
-    "ui",
-    "animation"
+    "ui"
   ],
   "author": {
     "name": "Raphael Hoppe",
