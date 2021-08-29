@@ -6,21 +6,28 @@ using UnityEngine.UI;
 
 namespace MgSq.UI.Editor
 {
-    [ExecuteInEditMode()]
-    public class EditorExtensions : MonoBehaviour
-    {
-        [MenuItem("GameObject/UI/Custom/Linear Progress Bar")]
-        public static void AddLinearProgressBar()
-        {
-            GameObject obj = Instantiate(Resources.Load<GameObject>("LinearProgressBar"));
-            obj.transform.SetParent(Selection.activeGameObject.transform,false);
-        }
+	[ExecuteInEditMode()]
+	public class EditorExtensions : MonoBehaviour
+	{
+		[MenuItem("GameObject/UI/Custom/Linear Progress Bar")]
+		public static void AddLinearProgressBar()
+		{
+			GameObject obj = Instantiate(Resources.Load<GameObject>("LinearProgressBar"));
+			obj.transform.SetParent(Selection.activeGameObject.transform, false);
+		}
 
-        [MenuItem("GameObject/UI/Custom/Radial Progress Bar")]
-        public static void AddRadialProgressBar()
-        {
-            GameObject obj = Instantiate(Resources.Load<GameObject>("RadialProgressBar"));
-            obj.transform.SetParent(Selection.activeGameObject.transform,false);
-        }
-    }
+		[MenuItem("GameObject/UI/Custom/Radial Progress Bar")]
+		public static void AddRadialProgressBar()
+		{
+			GameObject obj = Instantiate(Resources.Load<GameObject>("RadialProgressBar"));
+			obj.transform.SetParent(Selection.activeGameObject.transform, false);
+		}
+
+		[MenuItem("GameObject/UI/Custom/InventoryUi")]
+		public static void AddInventoryUi()
+		{
+			GameObject obj = Instantiate(Resources.Load<GameObject>("InventoryUi"));
+			obj.transform.SetParent(Selection.activeGameObject.transform, false);
+		}
+	}
 }
