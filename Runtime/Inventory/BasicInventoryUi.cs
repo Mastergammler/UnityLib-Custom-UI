@@ -15,7 +15,7 @@ namespace MgSq.UI.Inventory
 		//##  CONSTANTS  ##
 		//#################
 
-		static readonly string IMAGE_SLOT_OBJECT_NAME = "Item";
+		public static readonly string IMAGE_SLOT_OBJECT_NAME = "Item";
 		public static readonly Color COLOR_TRANSPARENT = new Color(0, 0, 0, 0);
 		public static readonly Color COLOR_WHITE = new Color(1, 1, 1, 1);
 
@@ -23,14 +23,31 @@ namespace MgSq.UI.Inventory
 		//##  MEMBERS  ##
 		//###############
 
-		private Image[] mAvailableUiSlots;
+		protected Image[] mAvailableUiSlots;
 		private int mUiSlotNumber;
-		private IDictionary<int, ItemView> mSlotItemMapping = new Dictionary<int, ItemView>();
+		/// <summary>
+		/// Maps the view items to the slot index at initialization 
+		/// </summary>
+		/// <typeparam name="int">Slot index at initialization</typeparam>
+		/// <typeparam name="ItemView">Item view that holds the display properties</typeparam>
+		/// <returns></returns>
+		protected IDictionary<int, ItemView> mStaticSlotItemMapping = new Dictionary<int, ItemView>();
 		private Func<Transform, int, Image> getItemImageElement = (t, i) => t.GetChild(i).Find(IMAGE_SLOT_OBJECT_NAME).GetComponentInChildren<Image>();
 
 		//################
 		//##    MONO    ##
 		//################
+
+
+
+		private void Awake()
+		{
+			// All childs have to be active, that the ElementIndexer script gets executed
+			for (int i = 0; i < transform.childCount; i++)
+			{
+				transform.GetChild(i).gameObject.SetActive(true);
+			}
+		}
 
 		void Start()
 		{
@@ -48,14 +65,16 @@ namespace MgSq.UI.Inventory
 				mAvailableUiSlots[i].color = COLOR_TRANSPARENT;
 
 				var curChild = transform.GetChild(i);
-				curChild.GetComponent<Button>().onClick.AddListener(() =>
-				{
-					int index = curChild.GetSiblingIndex();
-					if (mSlotItemMapping.TryGetValue(index, out ItemView view))
-					{
-						OnItemSelected?.Invoke(view.ItemId);
-					}
-				});
+				curChild.GetComponent<Button>().onClick.AddListener(() => initButtonListener(curChild));
+			}
+		}
+
+		private void initButtonListener(Transform buttonTransform)
+		{
+			int index = buttonTransform.GetComponent<ElementIndexer>().StaticIndex;
+			if (mStaticSlotItemMapping.TryGetValue(index, out ItemView view))
+			{
+				OnItemSelected?.Invoke(view.ItemId);
 			}
 		}
 
@@ -64,14 +83,14 @@ namespace MgSq.UI.Inventory
 		//######################
 
 		/// <inheritdoc/>
-		public void AddItem(ItemView item)
+		public virtual void AddItem(ItemView item)
 		{
-			int foundSlot = findNextAvailableIndex();
-			if (foundSlot != -1)
+			int freeStaticSlotIndex = findNextAvailableStaticIndex();
+			if (freeStaticSlotIndex != -1)
 			{
-				mSlotItemMapping.Add(foundSlot, item);
-				mAvailableUiSlots[foundSlot].color = COLOR_WHITE;
-				mAvailableUiSlots[foundSlot].sprite = item.Image;
+				mStaticSlotItemMapping.Add(freeStaticSlotIndex, item);
+				mAvailableUiSlots[freeStaticSlotIndex].color = COLOR_WHITE;
+				mAvailableUiSlots[freeStaticSlotIndex].sprite = item.Image;
 			}
 			else
 			{
@@ -80,23 +99,23 @@ namespace MgSq.UI.Inventory
 		}
 
 		/// <inheritdoc/>
-		public void RemoveItem(Guid itemId)
+		public virtual void RemoveItem(Guid itemId)
 		{
-			var slotIndex = mSlotItemMapping.First(kvp => kvp.Value.ItemId.Equals(itemId)).Key;
-			mSlotItemMapping.Remove(slotIndex);
-			mAvailableUiSlots[slotIndex].color = COLOR_TRANSPARENT;
-			mAvailableUiSlots[slotIndex].sprite = null;
+			var staticSlotIndex = mStaticSlotItemMapping.First(kvp => kvp.Value.ItemId.Equals(itemId)).Key;
+			mStaticSlotItemMapping.Remove(staticSlotIndex);
+			mAvailableUiSlots[staticSlotIndex].color = COLOR_TRANSPARENT;
+			mAvailableUiSlots[staticSlotIndex].sprite = null;
 		}
 
 		//#################
 		//##  AUXILIARY  ##
 		//#################
 
-		private int findNextAvailableIndex()
+		protected virtual int findNextAvailableStaticIndex()
 		{
-			for (int i = 0; i < mUiSlotNumber; i++)
+			for (int staticIndex = 0; staticIndex < mUiSlotNumber; staticIndex++)
 			{
-				if (mAvailableUiSlots[i].color.Equals(COLOR_TRANSPARENT)) return i;
+				if (mAvailableUiSlots[staticIndex].color.Equals(COLOR_TRANSPARENT)) return staticIndex;
 			}
 			return -1;
 		}
