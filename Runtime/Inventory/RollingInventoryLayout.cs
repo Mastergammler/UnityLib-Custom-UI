@@ -14,30 +14,33 @@ namespace MgSq.UI.Inventory
 		[Tooltip("Cell size that has been calculated by the component. It is not changable")]
 		public Vector2 CellSize;
 
-		public bool Update;
-
+		[Tooltip("Click this to update the Layout. It can not be automatically updated, because of animations that are run at runtime")]
+		public bool ExecuteUpdate;
 
 		private void Start()
 		{
-			CalculateLayoutInputHorizontal_New();
+			CalculateLayoutNow();
 		}
 
 		public override void CalculateLayoutInputHorizontal()
 		{
-			if (Update)
+			if (ExecuteUpdate)
 			{
-				Update = false;
-				CalculateLayoutInputHorizontal_New();
+				ExecuteUpdate = false;
+				CalculateLayoutNow();
+				DeactivateHiddenSlots();
 			}
 		}
 
-		public void CalculateLayoutInputHorizontal_New()
+		public void CalculateLayoutNow()
 		{
 			base.CalculateLayoutInputHorizontal();
 
 			CalculateCellSize();
 			SetElementPositions();
-			DeactivateHiddenSlots();
+			// DeactivateHiddenSlots();
+			ScaleSecondItem();
+			MoveToNextItem();
 		}
 
 		private void CalculateCellSize()
@@ -63,12 +66,24 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
+		private void ScaleSecondItem()
+		{
+			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1.5f, 1.5f, 1f), .1f);
+		}
+
+		private void MoveToNextItem()
+		{
+			LeanTween.moveLocalY(transform.gameObject, CellSize.y + YSpacing, 2f);
+			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), .3f);
+			LeanTween.scale(rectChildren[2].gameObject, new Vector3(1.5f, 1.5f, 1.5f), .8f);
+		}
+
 		private void DeactivateHiddenSlots()
 		{
 			for (int i = 0; i < rectChildren.Count; i++)
 			{
-				if (i >= VisibleSlotNumber) rectChildren[i].gameObject.SetActive(false);
-				else rectChildren[i].gameObject.SetActive(true);
+				if (i >= VisibleSlotNumber) transform.GetChild(i).gameObject.SetActive(false);
+				else transform.GetChild(i).gameObject.SetActive(true);
 			}
 		}
 
