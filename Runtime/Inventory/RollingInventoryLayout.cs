@@ -17,6 +17,8 @@ namespace MgSq.UI.Inventory
 		[Tooltip("Click this to update the Layout. It can not be automatically updated, because of animations that are run at runtime")]
 		public bool ExecuteUpdate;
 
+		private int mSlotOffset = 0;
+
 		private void Start()
 		{
 			CalculateLayoutNow();
@@ -105,6 +107,24 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
+		public int CalculateDisplayIndexFor(int originalIndex)
+		{
+			var displayIndex = mSlotOffset + originalIndex;
+			if (displayIndex >= transform.childCount)
+				displayIndex -= transform.childCount;
+
+			return displayIndex;
+		}
+
+		private void adjustSlotOffset(bool forward = true)
+		{
+			if (forward) mSlotOffset++;
+			else mSlotOffset--;
+
+			if (mSlotOffset >= transform.childCount) mSlotOffset = 0;
+			else if (mSlotOffset < 0) mSlotOffset = transform.childCount - 1;
+		}
+
 		public override void CalculateLayoutInputVertical() { }
 		public override void SetLayoutHorizontal() { }
 		public override void SetLayoutVertical() { }
@@ -113,11 +133,13 @@ namespace MgSq.UI.Inventory
 		public void OnForward()
 		{
 			MoveToNextItem();
+			adjustSlotOffset();
 		}
 
 		public void OnBackward()
 		{
 			Debug.Log("Backward triggered");
+			adjustSlotOffset(false);
 		}
 	}
 }

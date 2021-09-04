@@ -15,7 +15,7 @@ namespace MgSq.UI.Inventory
 		//##  CONSTANTS  ##
 		//#################
 
-		static readonly string IMAGE_SLOT_OBJECT_NAME = "Item";
+		public static readonly string IMAGE_SLOT_OBJECT_NAME = "Item";
 		public static readonly Color COLOR_TRANSPARENT = new Color(0, 0, 0, 0);
 		public static readonly Color COLOR_WHITE = new Color(1, 1, 1, 1);
 
@@ -23,9 +23,9 @@ namespace MgSq.UI.Inventory
 		//##  MEMBERS  ##
 		//###############
 
-		private Image[] mAvailableUiSlots;
+		protected Image[] mAvailableUiSlots;
 		private int mUiSlotNumber;
-		private IDictionary<int, ItemView> mSlotItemMapping = new Dictionary<int, ItemView>();
+		protected IDictionary<int, ItemView> mSlotItemMapping = new Dictionary<int, ItemView>();
 		private Func<Transform, int, Image> getItemImageElement = (t, i) => t.GetChild(i).Find(IMAGE_SLOT_OBJECT_NAME).GetComponentInChildren<Image>();
 
 		//################
@@ -48,14 +48,16 @@ namespace MgSq.UI.Inventory
 				mAvailableUiSlots[i].color = COLOR_TRANSPARENT;
 
 				var curChild = transform.GetChild(i);
-				curChild.GetComponent<Button>().onClick.AddListener(() =>
-				{
-					int index = curChild.GetSiblingIndex();
-					if (mSlotItemMapping.TryGetValue(index, out ItemView view))
-					{
-						OnItemSelected?.Invoke(view.ItemId);
-					}
-				});
+				curChild.GetComponent<Button>().onClick.AddListener(() => initButtonListener(curChild));
+			}
+		}
+
+		protected virtual void initButtonListener(Transform buttonTransform)
+		{
+			int index = buttonTransform.GetSiblingIndex();
+			if (mSlotItemMapping.TryGetValue(index, out ItemView view))
+			{
+				OnItemSelected?.Invoke(view.ItemId);
 			}
 		}
 
@@ -64,7 +66,7 @@ namespace MgSq.UI.Inventory
 		//######################
 
 		/// <inheritdoc/>
-		public void AddItem(ItemView item)
+		public virtual void AddItem(ItemView item)
 		{
 			int foundSlot = findNextAvailableIndex();
 			if (foundSlot != -1)
@@ -80,7 +82,7 @@ namespace MgSq.UI.Inventory
 		}
 
 		/// <inheritdoc/>
-		public void RemoveItem(Guid itemId)
+		public virtual void RemoveItem(Guid itemId)
 		{
 			var slotIndex = mSlotItemMapping.First(kvp => kvp.Value.ItemId.Equals(itemId)).Key;
 			mSlotItemMapping.Remove(slotIndex);
@@ -92,7 +94,7 @@ namespace MgSq.UI.Inventory
 		//##  AUXILIARY  ##
 		//#################
 
-		private int findNextAvailableIndex()
+		protected virtual int findNextAvailableIndex()
 		{
 			for (int i = 0; i < mUiSlotNumber; i++)
 			{
