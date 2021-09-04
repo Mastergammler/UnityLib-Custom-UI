@@ -28,7 +28,6 @@ namespace MgSq.UI.Inventory
 			{
 				ExecuteUpdate = false;
 				CalculateLayoutNow();
-				DeactivateHiddenSlots();
 			}
 		}
 
@@ -36,11 +35,10 @@ namespace MgSq.UI.Inventory
 		{
 			base.CalculateLayoutInputHorizontal();
 
+			DeactivateHiddenSlots();
 			CalculateCellSize();
 			SetElementPositions();
-			// DeactivateHiddenSlots();
 			ScaleSecondItem();
-			MoveToNextItem();
 		}
 
 		private void CalculateCellSize()
@@ -55,9 +53,9 @@ namespace MgSq.UI.Inventory
 
 		private void SetElementPositions()
 		{
-			for (int i = 0; i < rectChildren.Count; i++)
+			for (int i = 0; i < transform.childCount; i++)
 			{
-				var rectItem = rectChildren[i];
+				var rectItem = transform.GetChild(i).GetComponent<RectTransform>();
 				var posX = padding.left;
 				var posY = padding.top + (CellSize.y + YSpacing) * i;
 
@@ -68,27 +66,58 @@ namespace MgSq.UI.Inventory
 
 		private void ScaleSecondItem()
 		{
-			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1.5f, 1.5f, 1f), .1f);
+			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1.5f, 1.5f, 1f), .2f);
 		}
 
 		private void MoveToNextItem()
 		{
-			LeanTween.moveLocalY(transform.gameObject, CellSize.y + YSpacing, 2f);
+			for (int i = 0; i < transform.childCount; i++)
+			{
+				var curItem = transform.GetChild(i);
+				LeanTween.moveLocalY(curItem.gameObject, curItem.localPosition.y + CellSize.y + YSpacing, 1f);
+			}
+
 			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), .3f);
-			LeanTween.scale(rectChildren[2].gameObject, new Vector3(1.5f, 1.5f, 1.5f), .8f);
+			LeanTween.scale(rectChildren[0].gameObject, new Vector3(.1f, .1f, 1f), .4f)
+					.setOnComplete(() =>
+					{
+						rectChildren[0].SetAsLastSibling();
+						DeactivateHiddenSlots();
+					});
+			LeanTween.delayedCall(1.1f, () => CalculateLayoutNow());
 		}
 
 		private void DeactivateHiddenSlots()
 		{
-			for (int i = 0; i < rectChildren.Count; i++)
+			for (int i = 0; i < transform.childCount; i++)
 			{
-				if (i >= VisibleSlotNumber) transform.GetChild(i).gameObject.SetActive(false);
-				else transform.GetChild(i).gameObject.SetActive(true);
+				if (i < VisibleSlotNumber)
+				{
+					transform.GetChild(i).gameObject.SetActive(true);
+					if (i != 1)
+						LeanTween.scale(transform.GetChild(i).gameObject, new Vector3(1f, 1f, 1f), .4f);
+				}
+				else
+				{
+					transform.GetChild(i).gameObject.SetActive(false);
+					transform.GetChild(i).localScale = new Vector3(.1f, .1f, 1f);
+				}
 			}
 		}
 
 		public override void CalculateLayoutInputVertical() { }
 		public override void SetLayoutHorizontal() { }
 		public override void SetLayoutVertical() { }
+
+
+		public void OnForward()
+		{
+			MoveToNextItem();
+		}
+
+		public void OnBackward()
+		{
+			Debug.Log("Backward triggered");
+		}
 	}
 }
