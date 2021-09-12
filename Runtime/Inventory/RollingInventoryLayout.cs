@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,8 @@ namespace MgSq.UI.Inventory
 		[Tooltip("Cell size that has been calculated by the component. It is not changable")]
 		public Vector2 CellSize;
 
+		[Tooltip("Modification factor to speed up or slow down the ui animation.")]
+		public float AnimationSpeedMultiplicator = 1f;
 		[Tooltip("Click this to update the Layout. It can not be automatically updated, because of animations that are run at runtime")]
 		public bool ExecuteUpdate;
 
@@ -21,7 +24,7 @@ namespace MgSq.UI.Inventory
 
 		private void Start()
 		{
-			CalculateLayoutNow();
+			calculateLayoutNow();
 		}
 
 		public override void CalculateLayoutInputHorizontal()
@@ -29,21 +32,21 @@ namespace MgSq.UI.Inventory
 			if (ExecuteUpdate)
 			{
 				ExecuteUpdate = false;
-				CalculateLayoutNow();
+				calculateLayoutNow();
 			}
 		}
 
-		public void CalculateLayoutNow()
+		private void calculateLayoutNow()
 		{
 			base.CalculateLayoutInputHorizontal();
 
-			DeactivateHiddenSlots();
-			CalculateCellSize();
-			SetElementPositions();
-			ScaleSecondItem();
+			deactivateHiddenSlots();
+			calculateCellSize();
+			setElementPositions();
+			scaleSecondItem();
 		}
 
-		private void CalculateCellSize()
+		private void calculateCellSize()
 		{
 			float parentWidth = rectTransform.rect.width;
 			float parentHeight = rectTransform.rect.height;
@@ -53,7 +56,7 @@ namespace MgSq.UI.Inventory
 							/ VisibleSlotNumber;
 		}
 
-		private void SetElementPositions()
+		private void setElementPositions()
 		{
 			for (int i = 0; i < transform.childCount; i++)
 			{
@@ -66,30 +69,55 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
-		private void ScaleSecondItem()
+
+		private float calculateAnimationTime(float baseTime) => baseTime * (1 / AnimationSpeedMultiplicator);
+
+		private void scaleSecondItem()
 		{
 			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1.5f, 1.5f, 1f), .2f);
 		}
 
-		private void MoveToNextItem()
+		private void moveToNextItem(float offset, RectTransform objectToDissapear, Action<RectTransform> adjustHierarchy)
 		{
 			for (int i = 0; i < transform.childCount; i++)
 			{
 				var curItem = transform.GetChild(i);
-				LeanTween.moveLocalY(curItem.gameObject, curItem.localPosition.y + CellSize.y + YSpacing, 1f);
+				LeanTween.moveLocalY(curItem.gameObject, curItem.localPosition.y + offset, calculateAnimationTime(1f));
 			}
 
-			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), .3f);
-			LeanTween.scale(rectChildren[0].gameObject, new Vector3(.1f, .1f, 1f), .4f)
+			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.3f));
+			LeanTween.scale(objectToDissapear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.4f))
 					.setOnComplete(() =>
 					{
-						rectChildren[0].SetAsLastSibling();
-						DeactivateHiddenSlots();
+						adjustHierarchy(objectToDissapear);
+						deactivateHiddenSlots();
 					});
-			LeanTween.delayedCall(1.1f, () => CalculateLayoutNow());
+			LeanTween.delayedCall(calculateAnimationTime(1.1f), () => calculateLayoutNow());
 		}
 
-		private void DeactivateHiddenSlots()
+		private void moveItems(bool upward = true)
+		{
+			float offset;
+			RectTransform scaleToDissapear;
+			Action<RectTransform> action;
+
+			if (upward)
+			{
+				offset = CellSize.y + YSpacing;
+				scaleToDissapear = rectChildren[0];
+				action = rect => rect.SetAsLastSibling();
+			}
+			else
+			{
+				offset = -(CellSize.y + YSpacing);
+				scaleToDissapear = rectChildren[rectChildren.Count - 1];
+				action = rect => rect.SetAsFirstSibling();
+			}
+
+			moveToNextItem(offset, scaleToDissapear, action);
+		}
+
+		private void deactivateHiddenSlots()
 		{
 			for (int i = 0; i < transform.childCount; i++)
 			{
@@ -97,7 +125,7 @@ namespace MgSq.UI.Inventory
 				{
 					transform.GetChild(i).gameObject.SetActive(true);
 					if (i != 1)
-						LeanTween.scale(transform.GetChild(i).gameObject, new Vector3(1f, 1f, 1f), .4f);
+						LeanTween.scale(transform.GetChild(i).gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.4f));
 				}
 				else
 				{
@@ -107,6 +135,7 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
+		[Obsolete("Not needed anymore, because everything is based on the start index now.")]
 		public int CalculateDisplayIndexFor(int originalIndex)
 		{
 			var displayIndex = (originalIndex + mSlotOffset) % transform.childCount;
@@ -129,13 +158,13 @@ namespace MgSq.UI.Inventory
 
 		public void OnForward()
 		{
-			MoveToNextItem();
+			moveItems(true);
 			adjustSlotOffset();
 		}
 
 		public void OnBackward()
 		{
-			Debug.Log("Backward triggered");
+			moveItems(false);
 			adjustSlotOffset(false);
 		}
 	}
