@@ -109,17 +109,14 @@ namespace MgSq.UI.Inventory
 
 		public int CalculateDisplayIndexFor(int originalIndex)
 		{
-			var displayIndex = mSlotOffset + originalIndex;
-			if (displayIndex >= transform.childCount)
-				displayIndex -= transform.childCount;
-
+			var displayIndex = (originalIndex + mSlotOffset) % transform.childCount;
 			return displayIndex;
 		}
 
 		private void adjustSlotOffset(bool forward = true)
 		{
-			if (forward) mSlotOffset++;
-			else mSlotOffset--;
+			if (forward) mSlotOffset--;
+			else mSlotOffset++;
 
 			if (mSlotOffset >= transform.childCount) mSlotOffset = 0;
 			else if (mSlotOffset < 0) mSlotOffset = transform.childCount - 1;
