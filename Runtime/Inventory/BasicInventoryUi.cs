@@ -38,6 +38,17 @@ namespace MgSq.UI.Inventory
 		//##    MONO    ##
 		//################
 
+
+
+		private void Awake()
+		{
+			// All childs have to be active, that the ElementIndexer script gets executed
+			for (int i = 0; i < transform.childCount; i++)
+			{
+				transform.GetChild(i).gameObject.SetActive(true);
+			}
+		}
+
 		void Start()
 		{
 			mUiSlotNumber = transform.childCount;
@@ -58,9 +69,6 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
 		private void initButtonListener(Transform buttonTransform)
 		{
 			int index = buttonTransform.GetComponent<ElementIndexer>().StaticIndex;
