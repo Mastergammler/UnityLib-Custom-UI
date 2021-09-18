@@ -32,7 +32,8 @@ namespace MgSq.UI.Inventory
 		/// <typeparam name="ItemView">Item view that holds the display properties</typeparam>
 		/// <returns></returns>
 		protected IDictionary<int, ItemView> mStaticSlotItemMapping = new Dictionary<int, ItemView>();
-		private Func<Transform, int, Image> getItemImageElement = (t, i) => t.GetChild(i).Find(IMAGE_SLOT_OBJECT_NAME).GetComponentInChildren<Image>();
+		private Func<Transform, int, Image> getItemImageElement = (t, i) => t.GetChild(i).Find(IMAGE_SLOT_OBJECT_NAME)
+																						 .GetComponentInChildren<Image>();
 
 		//################
 		//##    MONO    ##

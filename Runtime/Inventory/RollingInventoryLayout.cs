@@ -4,8 +4,20 @@ using UnityEngine.UI;
 
 namespace MgSq.UI.Inventory
 {
+	/// <summary>
+	/// Animation and layout handling for the rolling inventory ui. 
+	/// It handles the scaling of the elements, repositoning and hiding of elements 
+	/// As well as the item tracking of the active items. 
+	/// </summary>
 	public class RollingInventoryLayout : LayoutGroup
 	{
+
+		//##################
+		//##    EDITOR    ##
+		//##################
+
+		#region Editor Values
+
 		[Tooltip("Spacing between the button elements")]
 		public float YSpacing = 30;
 
@@ -17,15 +29,46 @@ namespace MgSq.UI.Inventory
 
 		[Tooltip("Modification factor to speed up or slow down the ui animation.")]
 		public float AnimationSpeedMultiplicator = 1f;
+
 		[Tooltip("Click this to update the Layout. It can not be automatically updated, because of animations that are run at runtime")]
 		public bool ExecuteUpdate;
 
-		private int mSlotOffset = 0;
+		#endregion
 
-		private void Start()
+		//###############
+		//##  MEMBERS  ##
+		//###############
+
+		private int mSlotOffset = 0;
+		private bool mInAnimation = false;
+
+		//################
+		//##    MONO    ##
+		//################
+
+		private new void Start()
 		{
 			calculateLayoutNow();
+			scaleSecondItem();
 		}
+
+		//#################
+		//##  INTERFACE  ##
+		//#################
+
+		[Obsolete("Not needed anymore, because everything is based on the start index now.")]
+		public int CalculateDisplayIndexFor(int originalIndex)
+		{
+			var displayIndex = (originalIndex + mSlotOffset) % transform.childCount;
+			return displayIndex;
+		}
+
+		public void OnForward() => moveItems(true);
+		public void OnBackward() => moveItems(false);
+
+		//####################
+		//##  LAYOUT GROUP  ##
+		//####################
 
 		public override void CalculateLayoutInputHorizontal()
 		{
@@ -43,8 +86,18 @@ namespace MgSq.UI.Inventory
 			deactivateHiddenSlots();
 			calculateCellSize();
 			setElementPositions();
-			scaleSecondItem();
+			// scaleSecondItem();
 		}
+
+		public override void CalculateLayoutInputVertical() { }
+		public override void SetLayoutHorizontal() { }
+		public override void SetLayoutVertical() { }
+
+		//#################
+		//##  AUXILIARY  ##
+		//#################
+
+		#region Auxiliary Methods
 
 		private void calculateCellSize()
 		{
@@ -69,7 +122,6 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
-
 		private float calculateAnimationTime(float baseTime) => baseTime * (1 / AnimationSpeedMultiplicator);
 
 		private void scaleSecondItem()
@@ -77,26 +129,37 @@ namespace MgSq.UI.Inventory
 			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1.5f, 1.5f, 1f), .2f);
 		}
 
-		private void moveToNextItem(float offset, RectTransform objectToDissapear, Action<RectTransform> adjustHierarchy)
+		private void moveToNextItem(float offset, RectTransform objectToDisappear, Action<RectTransform> adjustHierarchy)
 		{
+
 			for (int i = 0; i < transform.childCount; i++)
 			{
 				var curItem = transform.GetChild(i);
 				LeanTween.moveLocalY(curItem.gameObject, curItem.localPosition.y + offset, calculateAnimationTime(1f));
 			}
 
-			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.3f));
-			LeanTween.scale(objectToDissapear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.4f))
-					.setOnComplete(() =>
-					{
-						adjustHierarchy(objectToDissapear);
-						deactivateHiddenSlots();
-					});
-			LeanTween.delayedCall(calculateAnimationTime(1.1f), () => calculateLayoutNow());
+
+			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.8f));
+			int slotOffset = offset > 0 ? 1 : -1;
+			LeanTween.scale(rectChildren[1 + slotOffset].gameObject, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
+			LeanTween.scale(objectToDisappear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.8f))
+					 .setOnComplete(() =>
+					 {
+						 adjustHierarchy(objectToDisappear);
+						 deactivateHiddenSlots();
+					 });
+			LeanTween.delayedCall(calculateAnimationTime(1.1f), () =>
+			{
+				calculateLayoutNow();
+				mInAnimation = false;
+			});
 		}
 
 		private void moveItems(bool upward = true)
 		{
+			if (mInAnimation) return;
+			mInAnimation = true;
+
 			float offset;
 			RectTransform scaleToDissapear;
 			Action<RectTransform> action;
@@ -115,6 +178,7 @@ namespace MgSq.UI.Inventory
 			}
 
 			moveToNextItem(offset, scaleToDissapear, action);
+			adjustSlotOffset(upward);
 		}
 
 		private void deactivateHiddenSlots()
@@ -135,12 +199,6 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
-		[Obsolete("Not needed anymore, because everything is based on the start index now.")]
-		public int CalculateDisplayIndexFor(int originalIndex)
-		{
-			var displayIndex = (originalIndex + mSlotOffset) % transform.childCount;
-			return displayIndex;
-		}
 
 		private void adjustSlotOffset(bool forward = true)
 		{
@@ -151,21 +209,6 @@ namespace MgSq.UI.Inventory
 			else if (mSlotOffset < 0) mSlotOffset = transform.childCount - 1;
 		}
 
-		public override void CalculateLayoutInputVertical() { }
-		public override void SetLayoutHorizontal() { }
-		public override void SetLayoutVertical() { }
-
-
-		public void OnForward()
-		{
-			moveItems(true);
-			adjustSlotOffset();
-		}
-
-		public void OnBackward()
-		{
-			moveItems(false);
-			adjustSlotOffset(false);
-		}
+		#endregion
 	}
 }
