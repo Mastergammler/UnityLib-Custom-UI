@@ -153,7 +153,6 @@ namespace MgSq.UI.Inventory
 				calculateLayoutNow();
 				mInAnimation = false;
 			});
-			//  .setOnComplete(() => mInAnimation = false);
 		}
 
 		private void moveItems(bool upward = true)
