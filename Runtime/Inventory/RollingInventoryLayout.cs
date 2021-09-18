@@ -4,8 +4,20 @@ using UnityEngine.UI;
 
 namespace MgSq.UI.Inventory
 {
+	/// <summary>
+	/// Animation and layout handling for the rolling inventory ui. 
+	/// It handles the scaling of the elements, repositoning and hiding of elements 
+	/// As well as the item tracking of the active items. 
+	/// </summary>
 	public class RollingInventoryLayout : LayoutGroup
 	{
+
+		//##################
+		//##    EDITOR    ##
+		//##################
+
+		#region Editor Values
+
 		[Tooltip("Spacing between the button elements")]
 		public float YSpacing = 30;
 
@@ -17,15 +29,52 @@ namespace MgSq.UI.Inventory
 
 		[Tooltip("Modification factor to speed up or slow down the ui animation.")]
 		public float AnimationSpeedMultiplicator = 1f;
+
 		[Tooltip("Click this to update the Layout. It can not be automatically updated, because of animations that are run at runtime")]
 		public bool ExecuteUpdate;
 
+		#endregion
+
+		//###############
+		//##  MEMBERS  ##
+		//###############
+
 		private int mSlotOffset = 0;
 
-		private void Start()
+		//################
+		//##    MONO    ##
+		//################
+
+		private new void Start()
 		{
 			calculateLayoutNow();
 		}
+
+		//#################
+		//##  INTERFACE  ##
+		//#################
+
+		[Obsolete("Not needed anymore, because everything is based on the start index now.")]
+		public int CalculateDisplayIndexFor(int originalIndex)
+		{
+			var displayIndex = (originalIndex + mSlotOffset) % transform.childCount;
+			return displayIndex;
+		}
+		public void OnForward()
+		{
+			moveItems(true);
+			adjustSlotOffset(true);
+		}
+
+		public void OnBackward()
+		{
+			moveItems(false);
+			adjustSlotOffset(false);
+		}
+
+		//####################
+		//##  LAYOUT GROUP  ##
+		//####################
 
 		public override void CalculateLayoutInputHorizontal()
 		{
@@ -45,6 +94,16 @@ namespace MgSq.UI.Inventory
 			setElementPositions();
 			scaleSecondItem();
 		}
+
+		public override void CalculateLayoutInputVertical() { }
+		public override void SetLayoutHorizontal() { }
+		public override void SetLayoutVertical() { }
+
+		//#################
+		//##  AUXILIARY  ##
+		//#################
+
+		#region Auxiliary Methods
 
 		private void calculateCellSize()
 		{
@@ -68,7 +127,6 @@ namespace MgSq.UI.Inventory
 				SetChildAlongAxis(rectItem, 1, posY, CellSize.y);
 			}
 		}
-
 
 		private float calculateAnimationTime(float baseTime) => baseTime * (1 / AnimationSpeedMultiplicator);
 
@@ -135,12 +193,6 @@ namespace MgSq.UI.Inventory
 			}
 		}
 
-		[Obsolete("Not needed anymore, because everything is based on the start index now.")]
-		public int CalculateDisplayIndexFor(int originalIndex)
-		{
-			var displayIndex = (originalIndex + mSlotOffset) % transform.childCount;
-			return displayIndex;
-		}
 
 		private void adjustSlotOffset(bool forward = true)
 		{
@@ -151,21 +203,6 @@ namespace MgSq.UI.Inventory
 			else if (mSlotOffset < 0) mSlotOffset = transform.childCount - 1;
 		}
 
-		public override void CalculateLayoutInputVertical() { }
-		public override void SetLayoutHorizontal() { }
-		public override void SetLayoutVertical() { }
-
-
-		public void OnForward()
-		{
-			moveItems(true);
-			adjustSlotOffset();
-		}
-
-		public void OnBackward()
-		{
-			moveItems(false);
-			adjustSlotOffset(false);
-		}
+		#endregion
 	}
 }
