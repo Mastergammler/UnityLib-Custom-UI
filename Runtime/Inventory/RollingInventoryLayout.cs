@@ -139,10 +139,10 @@ namespace MgSq.UI.Inventory
 			}
 
 
-			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.5f));
+			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.8f));
 			int slotOffset = offset > 0 ? 1 : -1;
 			LeanTween.scale(rectChildren[1 + slotOffset].gameObject, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
-			LeanTween.scale(objectToDisappear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.5f))
+			LeanTween.scale(objectToDisappear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.8f))
 					 .setOnComplete(() =>
 					 {
 						 adjustHierarchy(objectToDisappear);
