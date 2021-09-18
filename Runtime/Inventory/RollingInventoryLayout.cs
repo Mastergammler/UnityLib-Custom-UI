@@ -40,6 +40,7 @@ namespace MgSq.UI.Inventory
 		//###############
 
 		private int mSlotOffset = 0;
+		private bool mInAnimation = false;
 
 		//################
 		//##    MONO    ##
@@ -48,6 +49,7 @@ namespace MgSq.UI.Inventory
 		private new void Start()
 		{
 			calculateLayoutNow();
+			scaleSecondItem();
 		}
 
 		//#################
@@ -60,17 +62,9 @@ namespace MgSq.UI.Inventory
 			var displayIndex = (originalIndex + mSlotOffset) % transform.childCount;
 			return displayIndex;
 		}
-		public void OnForward()
-		{
-			moveItems(true);
-			adjustSlotOffset(true);
-		}
 
-		public void OnBackward()
-		{
-			moveItems(false);
-			adjustSlotOffset(false);
-		}
+		public void OnForward() => moveItems(true);
+		public void OnBackward() => moveItems(false);
 
 		//####################
 		//##  LAYOUT GROUP  ##
@@ -92,7 +86,7 @@ namespace MgSq.UI.Inventory
 			deactivateHiddenSlots();
 			calculateCellSize();
 			setElementPositions();
-			scaleSecondItem();
+			// scaleSecondItem();
 		}
 
 		public override void CalculateLayoutInputVertical() { }
@@ -135,26 +129,38 @@ namespace MgSq.UI.Inventory
 			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1.5f, 1.5f, 1f), .2f);
 		}
 
-		private void moveToNextItem(float offset, RectTransform objectToDissapear, Action<RectTransform> adjustHierarchy)
+		private void moveToNextItem(float offset, RectTransform objectToDisappear, Action<RectTransform> adjustHierarchy)
 		{
+
 			for (int i = 0; i < transform.childCount; i++)
 			{
 				var curItem = transform.GetChild(i);
 				LeanTween.moveLocalY(curItem.gameObject, curItem.localPosition.y + offset, calculateAnimationTime(1f));
 			}
 
-			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.3f));
-			LeanTween.scale(objectToDissapear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.4f))
-					.setOnComplete(() =>
-					{
-						adjustHierarchy(objectToDissapear);
-						deactivateHiddenSlots();
-					});
-			LeanTween.delayedCall(calculateAnimationTime(1.1f), () => calculateLayoutNow());
+
+			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.5f));
+			int slotOffset = offset > 0 ? 1 : -1;
+			LeanTween.scale(rectChildren[1 + slotOffset].gameObject, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
+			LeanTween.scale(objectToDisappear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.5f))
+					 .setOnComplete(() =>
+					 {
+						 adjustHierarchy(objectToDisappear);
+						 deactivateHiddenSlots();
+					 });
+			LeanTween.delayedCall(calculateAnimationTime(1.1f), () =>
+			{
+				calculateLayoutNow();
+				mInAnimation = false;
+			});
+			//  .setOnComplete(() => mInAnimation = false);
 		}
 
 		private void moveItems(bool upward = true)
 		{
+			if (mInAnimation) return;
+			mInAnimation = true;
+
 			float offset;
 			RectTransform scaleToDissapear;
 			Action<RectTransform> action;
@@ -173,6 +179,7 @@ namespace MgSq.UI.Inventory
 			}
 
 			moveToNextItem(offset, scaleToDissapear, action);
+			adjustSlotOffset(upward);
 		}
 
 		private void deactivateHiddenSlots()
