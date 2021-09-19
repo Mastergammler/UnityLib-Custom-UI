@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace MgSq.UI.Inventory
@@ -49,7 +50,7 @@ namespace MgSq.UI.Inventory
 		private new void Start()
 		{
 			calculateLayoutNow();
-			scaleSecondItem();
+			scaleItemWithIndex(1);
 		}
 
 		//#################
@@ -86,7 +87,6 @@ namespace MgSq.UI.Inventory
 			deactivateHiddenSlots();
 			calculateCellSize();
 			setElementPositions();
-			// scaleSecondItem();
 		}
 
 		public override void CalculateLayoutInputVertical() { }
@@ -124,9 +124,10 @@ namespace MgSq.UI.Inventory
 
 		private float calculateAnimationTime(float baseTime) => baseTime * (1 / AnimationSpeedMultiplicator);
 
-		private void scaleSecondItem()
+		private void scaleItemWithIndex(int index)
 		{
-			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1.5f, 1.5f, 1f), .2f);
+			LeanTween.scale(rectChildren[index].gameObject, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
+			EventSystem.current.SetSelectedGameObject(rectChildren[index].gameObject);
 		}
 
 		private void moveToNextItem(float offset, RectTransform objectToDisappear, Action<RectTransform> adjustHierarchy)
@@ -141,7 +142,7 @@ namespace MgSq.UI.Inventory
 
 			LeanTween.scale(rectChildren[1].gameObject, new Vector3(1f, 1f, 1f), calculateAnimationTime(.8f));
 			int slotOffset = offset > 0 ? 1 : -1;
-			LeanTween.scale(rectChildren[1 + slotOffset].gameObject, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
+			scaleItemWithIndex(1 + slotOffset);
 			LeanTween.scale(objectToDisappear.gameObject, new Vector3(.1f, .1f, 1f), calculateAnimationTime(.8f))
 					 .setOnComplete(() =>
 					 {
