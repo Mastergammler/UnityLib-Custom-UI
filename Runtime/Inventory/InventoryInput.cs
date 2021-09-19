@@ -33,6 +33,14 @@ public class @InventoryInput : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""ItemSelected"",
+                    ""type"": ""Button"",
+                    ""id"": ""16eee1fa-47f0-41c9-ac3d-514833e1f8fd"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -57,6 +65,17 @@ public class @InventoryInput : IInputActionCollection, IDisposable
                     ""action"": ""Backward"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""64ed6c5f-2018-4e43-b342-739a6fa87198"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ItemSelected"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -67,6 +86,7 @@ public class @InventoryInput : IInputActionCollection, IDisposable
         m_RollingInventory = asset.FindActionMap("RollingInventory", throwIfNotFound: true);
         m_RollingInventory_Forward = m_RollingInventory.FindAction("Forward", throwIfNotFound: true);
         m_RollingInventory_Backward = m_RollingInventory.FindAction("Backward", throwIfNotFound: true);
+        m_RollingInventory_ItemSelected = m_RollingInventory.FindAction("ItemSelected", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -118,12 +138,14 @@ public class @InventoryInput : IInputActionCollection, IDisposable
     private IRollingInventoryActions m_RollingInventoryActionsCallbackInterface;
     private readonly InputAction m_RollingInventory_Forward;
     private readonly InputAction m_RollingInventory_Backward;
+    private readonly InputAction m_RollingInventory_ItemSelected;
     public struct RollingInventoryActions
     {
         private @InventoryInput m_Wrapper;
         public RollingInventoryActions(@InventoryInput wrapper) { m_Wrapper = wrapper; }
         public InputAction @Forward => m_Wrapper.m_RollingInventory_Forward;
         public InputAction @Backward => m_Wrapper.m_RollingInventory_Backward;
+        public InputAction @ItemSelected => m_Wrapper.m_RollingInventory_ItemSelected;
         public InputActionMap Get() { return m_Wrapper.m_RollingInventory; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -139,6 +161,9 @@ public class @InventoryInput : IInputActionCollection, IDisposable
                 @Backward.started -= m_Wrapper.m_RollingInventoryActionsCallbackInterface.OnBackward;
                 @Backward.performed -= m_Wrapper.m_RollingInventoryActionsCallbackInterface.OnBackward;
                 @Backward.canceled -= m_Wrapper.m_RollingInventoryActionsCallbackInterface.OnBackward;
+                @ItemSelected.started -= m_Wrapper.m_RollingInventoryActionsCallbackInterface.OnItemSelected;
+                @ItemSelected.performed -= m_Wrapper.m_RollingInventoryActionsCallbackInterface.OnItemSelected;
+                @ItemSelected.canceled -= m_Wrapper.m_RollingInventoryActionsCallbackInterface.OnItemSelected;
             }
             m_Wrapper.m_RollingInventoryActionsCallbackInterface = instance;
             if (instance != null)
@@ -149,6 +174,9 @@ public class @InventoryInput : IInputActionCollection, IDisposable
                 @Backward.started += instance.OnBackward;
                 @Backward.performed += instance.OnBackward;
                 @Backward.canceled += instance.OnBackward;
+                @ItemSelected.started += instance.OnItemSelected;
+                @ItemSelected.performed += instance.OnItemSelected;
+                @ItemSelected.canceled += instance.OnItemSelected;
             }
         }
     }
@@ -157,5 +185,6 @@ public class @InventoryInput : IInputActionCollection, IDisposable
     {
         void OnForward(InputAction.CallbackContext context);
         void OnBackward(InputAction.CallbackContext context);
+        void OnItemSelected(InputAction.CallbackContext context);
     }
 }
