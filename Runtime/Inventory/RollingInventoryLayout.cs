@@ -131,7 +131,7 @@ namespace MgSq.UI.Inventory
 		{
 			mSelectedItem = rectChildren[index].gameObject;
 			LeanTween.scale(mSelectedItem, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
-			EventSystem.current.SetSelectedGameObject(mSelectedItem);
+			EventSystem.current?.SetSelectedGameObject(mSelectedItem);
 		}
 
 		private void moveToNextItem(float offset, RectTransform objectToDisappear, Action<RectTransform> adjustHierarchy)
