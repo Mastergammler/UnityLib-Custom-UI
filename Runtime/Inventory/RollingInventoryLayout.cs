@@ -42,6 +42,7 @@ namespace MgSq.UI.Inventory
 
 		private int mSlotOffset = 0;
 		private bool mInAnimation = false;
+		private GameObject mSelectedItem;
 
 		//################
 		//##    MONO    ##
@@ -66,6 +67,8 @@ namespace MgSq.UI.Inventory
 
 		public void OnForward() => moveItems(true);
 		public void OnBackward() => moveItems(false);
+		public void OnItemSelected() => mSelectedItem.GetComponent<Button>()
+													 .OnSubmit(new BaseEventData(EventSystem.current));
 
 		//####################
 		//##  LAYOUT GROUP  ##
@@ -126,8 +129,9 @@ namespace MgSq.UI.Inventory
 
 		private void scaleItemWithIndex(int index)
 		{
-			LeanTween.scale(rectChildren[index].gameObject, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
-			EventSystem.current.SetSelectedGameObject(rectChildren[index].gameObject);
+			mSelectedItem = rectChildren[index].gameObject;
+			LeanTween.scale(mSelectedItem, new Vector3(1.5f, 1.5f, 1f), calculateAnimationTime(1f));
+			EventSystem.current.SetSelectedGameObject(mSelectedItem);
 		}
 
 		private void moveToNextItem(float offset, RectTransform objectToDisappear, Action<RectTransform> adjustHierarchy)
