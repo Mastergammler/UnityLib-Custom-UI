@@ -1,8 +1,9 @@
 # Custom UI Package
 
-## v0.2.5
+## v0.2.5 - Rolling Inventory Ui
 
-TODO:
+- added rolling iventory ui components
+  - including editor extension
 
 ## v0.2.4
 
